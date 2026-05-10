@@ -522,14 +522,14 @@ body {
   to   { transform: rotate(360deg); }
 }
 
-#r-ticks, #r-tick-hand {
+#r-ticks, #r-comet {
   transform-origin: 80px 80px;
   animation: tick-sweep 60s linear infinite;
   animation-play-state: paused;
 }
 
 #screen-exporting:not([hidden]) #r-ticks,
-#screen-exporting:not([hidden]) #r-tick-hand {
+#screen-exporting:not([hidden]) #r-comet {
   animation-play-state: running;
 }
 

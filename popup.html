@@ -77,6 +77,19 @@
       <div class="export-pill">
         <div class="circle-wrap">
           <svg viewBox="0 0 160 160" width="80" height="80">
+            <defs>
+              <!-- Gradient runs from transparent (arc start, trailing edge)
+                   to opaque pink (arc end, leading edge).
+                   Coordinates are for t=0: arc starts at 3-o'clock (142,80)
+                   and sweeps ~35° clockwise to ~(131,116). gradientUnits=
+                   userSpaceOnUse so it's fixed in canvas space — direction
+                   will drift as the arc rotates, tune x1/y1/x2/y2 to taste. -->
+              <linearGradient id="cometGradient" gradientUnits="userSpaceOnUse"
+                x1="142" y1="80" x2="131" y2="116">
+                <stop offset="0%" stop-color="#ec008c" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#ec008c" stop-opacity="1"/>
+              </linearGradient>
+            </defs>
             <!-- Outer ring: progress track -->
             <circle cx="80" cy="80" r="68" fill="none"
               stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
@@ -88,14 +101,14 @@
               style="transform-origin:80px 80px;
                      transform:rotate(-90deg);
                      transition:stroke-dashoffset 0.4s ease;"/>
-            <!-- Inner ring: 60 animated tick marks -->
+            <!-- Inner ring: 60 static tick marks (track) -->
             <circle id="r-ticks" cx="80" cy="80" r="62" fill="none"
-              stroke="rgba(236,0,140,0.6)" stroke-width="4"
+              stroke="rgba(236,0,140,0.25)" stroke-width="4"
               stroke-dasharray="2.0 4.493"/>
-            <!-- Single bright tick (second hand) makes rotation visible -->
-            <circle id="r-tick-hand" cx="80" cy="80" r="62" fill="none"
-              stroke="#ec008c" stroke-width="4"
-              stroke-dasharray="6 383.56"/>
+            <!-- Comet arc: 6-tick-wide sweeping trail with fading gradient -->
+            <circle id="r-comet" cx="80" cy="80" r="62" fill="none"
+              stroke="url(#cometGradient)" stroke-width="5"
+              stroke-dasharray="38 351.56"/>
           </svg>
           <div class="ring-center">
             <div class="center-main">
