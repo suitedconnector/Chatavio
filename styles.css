@@ -147,6 +147,13 @@ body {
   display: block;
 }
 
+.logo-small {
+  height: 18px;
+  width: auto;
+  display: block;
+  margin: 0 auto 8px;
+}
+
 .logo-icon {
   width: 26px;
   height: 26px;
@@ -488,7 +495,7 @@ body {
 
 .screen-exporting {
   align-items: stretch;
-  min-height: 320px;
+  min-height: 200px;
 }
 
 
