@@ -899,30 +899,36 @@ if (!window.__chatExporterLoaded) {
 
         const href = card.href || card.querySelector('a')?.href || '';
 
-        // The link's aria-labelledby points to "project-<uuid>-title"
-        // Extract the UUID from the href and look up the title element by ID
+        // Real notebooks always have /notebook/{id} in their href.
         const notebookId = href.match(/\/notebook\/([^/?#\s]+)/)?.[1];
-        const id = notebookId || Math.random().toString(36).slice(2);
+        if (!notebookId) {
+          console.log('[ChatExporter] NotebookLM rejecting card (no notebookId):', card.outerHTML?.slice(0, 300));
+          continue;
+        }
 
-        if (!id || seen.has(id)) continue;
-        seen.add(id);
+        if (seen.has(notebookId)) continue;
+        seen.add(notebookId);
 
-        let title = 'Untitled Notebook';
+        // The link's aria-labelledby points to "project-<uuid>-title"
+        let title = '';
 
-        if (notebookId) {
-          const titleEl = document.getElementById(`project-${notebookId}-title`);
-          if (titleEl) {
-            title = titleEl.innerText?.trim() || titleEl.textContent?.trim() || 'Untitled Notebook';
-            console.log('[ChatExporter] NotebookLM title found via ID:', title);
-          } else {
-            // Fallback: parse aria-labelledby attribute and look up each referenced ID
-            const labelledBy = card.getAttribute('aria-labelledby') || '';
-            const titleId = labelledBy.split(' ').find(refId => refId.endsWith('-title'));
-            if (titleId) {
-              const el = document.getElementById(titleId);
-              title = el?.innerText?.trim() || 'Untitled Notebook';
-            }
+        const titleEl = document.getElementById(`project-${notebookId}-title`);
+        if (titleEl) {
+          title = titleEl.innerText?.trim() || titleEl.textContent?.trim() || '';
+          console.log('[ChatExporter] NotebookLM title found via ID:', title);
+        } else {
+          // Fallback: parse aria-labelledby attribute and look up each referenced ID
+          const labelledBy = card.getAttribute('aria-labelledby') || '';
+          const titleId = labelledBy.split(' ').find(refId => refId.endsWith('-title'));
+          if (titleId) {
+            const el = document.getElementById(titleId);
+            title = el?.innerText?.trim() || '';
           }
+        }
+
+        if (!title) {
+          console.log('[ChatExporter] NotebookLM rejecting card (no title):', card.outerHTML?.slice(0, 300));
+          continue;
         }
 
         const dateCandidates = [
@@ -943,7 +949,7 @@ if (!window.__chatExporterLoaded) {
 
         const fullHref = `https://notebooklm.google.com/notebook/${notebookId}`;
         threads.push({
-          id,
+          id: notebookId,
           title: title.slice(0, 100),
           date: date ? formatIsoDate(date) : '',
           messageCount: 0,
