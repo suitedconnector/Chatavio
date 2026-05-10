@@ -891,7 +891,12 @@ if (!window.__chatExporterLoaded) {
         console.log('[ChatExporter] NotebookLM body snippet:', document.body.innerHTML.slice(0, 1000));
       }
 
+      let cardIndex = 0;
       for (const card of cards) {
+        if (cardIndex < 2) {
+          console.log(`[ChatExporter] NotebookLM card[${cardIndex}] outerHTML:`, card.outerHTML?.slice(0, 600));
+        }
+
         const href = card.href || card.querySelector('a')?.href || '';
 
         // The link's aria-labelledby points to "project-<uuid>-title"
@@ -920,17 +925,31 @@ if (!window.__chatExporterLoaded) {
           }
         }
 
-        const dateEl = card.querySelector('time, [class*="date"], [class*="modified"]');
-        const date = dateEl?.getAttribute('datetime') || dateEl?.innerText?.trim() || '';
+        const dateCandidates = [
+          'time',
+          '[datetime]',
+          'mat-card-subtitle',
+          '[class*="subtitle"]',
+          '[class*="modified"]',
+          '[class*="updated"]',
+          '[class*="date"]',
+        ];
+        let date = '';
+        for (const sel of dateCandidates) {
+          const el = card.querySelector(sel);
+          const val = el?.getAttribute('datetime') || el?.innerText?.trim() || '';
+          if (val) { date = val; break; }
+        }
 
         const fullHref = `https://notebooklm.google.com/notebook/${notebookId}`;
         threads.push({
           id,
           title: title.slice(0, 100),
-          date: formatIsoDate(date || new Date().toISOString()),
+          date: date ? formatIsoDate(date) : '',
           messageCount: 0,
           href: fullHref,
         });
+        cardIndex++;
       }
 
       console.log('[ChatExporter] NotebookLM found notebooks:', threads.length);

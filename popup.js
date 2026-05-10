@@ -268,10 +268,6 @@ function createThreadItem(thread) {
 
   const meta = document.createElement('div');
   const dateStr = thread.date || '';
-  meta.textContent = dateStr
-    ? `${dateStr} • ${thread.messageCount || 0} msgs`
-    : (thread.messageCount ? `${thread.messageCount} msgs` : '');
-  if (!dateStr && !thread.messageCount) meta.style.display = 'none';
   meta.style.cssText = `
     font-size: 11px;
     color: #999;
@@ -279,7 +275,20 @@ function createThreadItem(thread) {
     flex-shrink: 0;
     padding-top: 1px;
   `;
-  
+
+  if (state.site === 'notebooklm') {
+    if (dateStr) {
+      meta.textContent = dateStr;
+    } else {
+      meta.hidden = true;
+    }
+  } else {
+    meta.textContent = dateStr
+      ? `${dateStr} • ${thread.messageCount || 0} msgs`
+      : (thread.messageCount ? `${thread.messageCount} msgs` : '');
+    if (!dateStr && !thread.messageCount) meta.hidden = true;
+  }
+
   content.appendChild(title);
   content.appendChild(meta);
   
