@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatavio</title>
+  <link rel="icon" type="image/png" href="icons/icon-32.png">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Screen: Disclaimer (first-run only) -->
+  <div id="screen-disclaimer" class="screen screen-disclaimer" hidden>
+    <div class="disclaimer-body">
+      <h3 class="disclaimer-title">⚠️ airobotools.com</h3>
+      <p>hello@airobotools.com</p>
+      <p>You are responsible for platform ToS compliance. Local processing only.</p>
+      <button id="accept-disclaimer-btn" class="btn btn-primary">Continue</button>
+    </div>
+  </div>
+
+  <!-- Screen: Loading -->
+  <div id="screen-loading" class="screen screen-loading">
+    <div class="spinner"></div>
+    <p id="loading-text">Loading…</p>
+  </div>
+
+  <!-- Screen: Selection -->
+  <div id="screen-selection" class="screen screen-selection" hidden>
+    <header>
+      <div class="logo">
+        <img src="logo/Chatavio-logo-wite.svg" alt="Chatavio" class="logo-img" />
+      </div>
+      <span id="site-badge" class="site-badge"></span>
+    </header>
+
+    <div class="quick-actions">
+      <button id="export-current-btn" class="btn btn-secondary btn-sm">Export Current Chat</button>
+      <select id="format-select" class="format-select">
+        <option value="markdown">Markdown</option>
+        <option value="json">JSON</option>
+        <option value="plaintext">Text</option>
+      </select>
+    </div>
+
+    <div id="limit-warning" class="limit-warning" hidden>
+      Exporting all threads may take several minutes.
+    </div>
+
+    <div class="search-row">
+      <input id="search-input" class="search-input" type="text" placeholder="Search threads…" autocomplete="off" />
+      <button id="select-all-btn" class="btn btn-ghost btn-sm">Select All</button>
+    </div>
+    <p id="select-all-hint" class="select-all-hint" hidden>Select All available when history is 20 chats or fewer</p>
+
+    <div id="export-quota" class="export-quota"></div>
+
+    <div id="thread-list" class="thread-list"></div>
+
+    <footer class="selection-footer">
+      <span id="selection-summary" class="selection-summary"></span>
+      <button id="export-selected-btn" class="btn btn-primary" disabled>Export Chats</button>
+    </footer>
+    <div id="tab-export-notice" hidden>
+      <span class="notice-icon">💬</span>
+      <span class="notice-text"></span>
+    </div>
+  </div>
+
+  <!-- Screen: Exporting -->
+  <div id="screen-exporting" class="screen screen-exporting" hidden>
+    <div style="padding: 20px;">
+      <h3 style="color: #fff; margin-bottom: 16px;">Exporting Chats…</h3>
+
+      <div class="export-pill">
+        <div class="circle-wrap">
+          <svg viewBox="0 0 160 160" width="52" height="52">
+            <!-- Outer ring: progress track -->
+            <circle cx="80" cy="80" r="68" fill="none"
+              stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+            <!-- Outer ring: progress fill -->
+            <circle id="r-prog" cx="80" cy="80" r="68" fill="none"
+              stroke="var(--accent,#7c6aff)" stroke-width="7"
+              stroke-linecap="round"
+              stroke-dasharray="427" stroke-dashoffset="427"
+              style="transform-origin:80px 80px;
+                     transform:rotate(-90deg);
+                     transition:stroke-dashoffset 0.4s ease;"/>
+            <!-- Inner ring: 60 animated tick marks -->
+            <circle id="r-ticks" cx="80" cy="80" r="44" fill="none"
+              stroke="rgba(124,106,255,0.45)" stroke-width="3"
+              stroke-dasharray="4.6 0.99"/>
+          </svg>
+          <div class="ring-center">
+            <div class="center-main">
+              <span class="center-num" id="ring-completed">0</span>
+              <span class="center-ms" id="ring-total"
+                style="display:block;font-size:9px;color:#7a8299">/ 0</span>
+            </div>
+          </div>
+        </div>
+        <div class="pill-filename" id="current-title">Preparing…</div>
+      </div>
+
+      <button class="cancel-btn" id="cancel-btn">Cancel Export</button>
+      <p class="bg-notice" style="margin-top:12px;">You can close this popup — the export continues in the background.</p>
+      <p id="free-tier-notice" class="bg-notice" hidden></p>
+    </div>
+  </div>
+
+  <!-- Screen: Done -->
+  <div id="screen-done" class="screen screen-done" hidden>
+    <div class="done-icon">✓</div>
+    <p id="done-text"></p>
+    <div class="done-buttons">
+      <button id="start-over-btn" class="btn btn-secondary">Export Again</button>
+      <button id="exit-btn" class="btn btn-secondary">Exit</button>
+    </div>
+  </div>
+
+  <!-- Screen: Error -->
+  <div id="screen-error" class="screen screen-error" hidden>
+    <div class="error-icon">✕</div>
+    <p id="error-text"></p>
+    <ul id="error-details" style="font-size:11px;text-align:left;margin:4px 0 0;padding-left:16px;list-style:disc"></ul>
+    <button id="retry-btn" class="btn btn-secondary">Try Again</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
