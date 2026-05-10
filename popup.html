@@ -76,22 +76,26 @@
 
       <div class="export-pill">
         <div class="circle-wrap">
-          <svg viewBox="0 0 160 160" width="110" height="110">
+          <svg viewBox="0 0 160 160" width="80" height="80">
             <!-- Outer ring: progress track -->
             <circle cx="80" cy="80" r="68" fill="none"
               stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
             <!-- Outer ring: progress fill -->
             <circle id="r-prog" cx="80" cy="80" r="68" fill="none"
-              stroke="var(--accent,#7c6aff)" stroke-width="7"
+              stroke="#ec008c" stroke-width="7"
               stroke-linecap="round"
               stroke-dasharray="427" stroke-dashoffset="427"
               style="transform-origin:80px 80px;
                      transform:rotate(-90deg);
                      transition:stroke-dashoffset 0.4s ease;"/>
             <!-- Inner ring: 60 animated tick marks -->
-            <circle id="r-ticks" cx="80" cy="80" r="44" fill="none"
-              stroke="rgba(124,106,255,0.45)" stroke-width="4"
-              stroke-dasharray="1.5 3.108"/>
+            <circle id="r-ticks" cx="80" cy="80" r="62" fill="none"
+              stroke="rgba(236,0,140,0.6)" stroke-width="4"
+              stroke-dasharray="2.0 4.493"/>
+            <!-- Single bright tick (second hand) makes rotation visible -->
+            <circle id="r-tick-hand" cx="80" cy="80" r="62" fill="none"
+              stroke="#ec008c" stroke-width="4"
+              stroke-dasharray="6 383.56"/>
           </svg>
           <div class="ring-center">
             <div class="center-main">

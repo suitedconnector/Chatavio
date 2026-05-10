@@ -522,13 +522,14 @@ body {
   to   { transform: rotate(360deg); }
 }
 
-#r-ticks {
+#r-ticks, #r-tick-hand {
   transform-origin: 80px 80px;
   animation: tick-sweep 60s linear infinite;
   animation-play-state: paused;
 }
 
-#screen-exporting:not([hidden]) #r-ticks {
+#screen-exporting:not([hidden]) #r-ticks,
+#screen-exporting:not([hidden]) #r-tick-hand {
   animation-play-state: running;
 }
 
@@ -541,15 +542,15 @@ body {
   padding: 6px 20px 6px 6px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 62px;
-  height: 122px;
+  border-radius: 46px;
+  height: 92px;
   margin-bottom: 16px;
   overflow: hidden;
 }
 
 .export-pill .circle-wrap {
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   flex-shrink: 0;
   position: relative;
 }
