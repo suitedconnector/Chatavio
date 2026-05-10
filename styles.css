@@ -517,9 +517,19 @@ body {
 
 /* #r-prog is driven entirely by JS (strokeDashoffset) — no CSS animation */
 
+@keyframes tick-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 #r-ticks {
-  animation: spin 4s linear infinite;
   transform-origin: 80px 80px;
+  animation: tick-sweep 60s linear infinite;
+  animation-play-state: paused;
+}
+
+#screen-exporting:not([hidden]) #r-ticks {
+  animation-play-state: running;
 }
 
 /* ── Export progress pill ──────────────────────────────────────────────────── */
@@ -538,8 +548,8 @@ body {
 }
 
 .export-pill .circle-wrap {
-  width: 52px;
-  height: 52px;
+  width: 62px;
+  height: 62px;
   flex-shrink: 0;
   position: relative;
 }
