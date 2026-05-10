@@ -541,15 +541,15 @@ body {
   padding: 6px 20px 6px 6px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 32px;
-  height: 64px;
+  border-radius: 62px;
+  height: 122px;
   margin-bottom: 16px;
   overflow: hidden;
 }
 
 .export-pill .circle-wrap {
-  width: 62px;
-  height: 62px;
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
   position: relative;
 }
@@ -571,7 +571,7 @@ body {
 
 .center-num {
   font-family: monospace;
-  font-size: 13px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--text);
   line-height: 1;
