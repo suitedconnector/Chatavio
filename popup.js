@@ -1,6 +1,8 @@
 // Chatavio — popup.js
 'use strict';
 
+const AUTO_DETACH_THRESHOLD = 10;
+
 // Cached once — true when the extension is loaded unpacked (development install).
 const _devModePromise = chrome.management.getSelf()
   .then(info => info.installType === 'development')
@@ -52,7 +54,42 @@ function initApp() {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  const isDetached = location.search.includes('detached=1');
+
+  if (isDetached) {
+    // Restore state saved by the spawning popup.
+    // This await yields immediately, letting the second DOMContentLoaded
+    // listener run and register all event handlers (including onMessage)
+    // before we call startExport().
+    const data = await chrome.storage.session.get('detachedState');
+    const ds = data.detachedState;
+    if (ds) {
+      await chrome.storage.session.remove('detachedState');
+      state.site = ds.site;
+      state.threads = ds.threads || [];
+      state.selected = new Set(ds.selected || []);
+      const formatEl = document.getElementById('format-select');
+      if (formatEl && ds.format) formatEl.value = ds.format;
+      const siteBadge = document.getElementById('site-badge');
+      if (siteBadge && ds.site) {
+        siteBadge.textContent = ds.site.toUpperCase();
+        siteBadge.style.display = 'block';
+      }
+      if (ds.autoExport) {
+        await startExport(ds.chatTabId);
+        return;
+      }
+      // Manual pop-out: show thread list with restored selection
+      showScreen('selection');
+      displayThreads();
+      updateSelectionUI();
+      updateExportQuota(ds.site);
+      maybeShowTabExportNotice(ds.site);
+      return;
+    }
+  }
+
   if (!localStorage.getItem('chatavio_terms_v1')) {
     document.getElementById('accept-disclaimer-btn')
       ?.addEventListener('click', initApp);
@@ -350,8 +387,50 @@ function updateSelectionUI() {
 
 // Export functionality
 
+// Opens popup.html in a persistent chrome.windows popup and closes the
+// current popup. Saves current state to session storage so the new window
+// can restore threads and (if autoExport) kick off the export immediately.
+async function openInWindow(autoExport = false) {
+  const format = document.getElementById('format-select')?.value || 'markdown';
+  let chatTabId = null;
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chatTabId = tab?.id ?? null;
+  } catch {}
+
+  await chrome.storage.session.set({
+    detachedState: {
+      chatTabId,
+      site: state.site,
+      threads: state.threads,
+      selected: [...state.selected],
+      format,
+      autoExport,
+    },
+  });
+
+  try {
+    const win = await chrome.windows.create({
+      url: chrome.runtime.getURL('popup.html?detached=1'),
+      type: 'popup',
+      width: 420,
+      height: 640,
+    });
+    if (win) { window.close(); return true; }
+  } catch (e) {
+    console.warn('[Chatavio] Failed to open in window:', e.message);
+  }
+  await chrome.storage.session.remove('detachedState');
+  return false;
+}
+
 async function exportSelectedThreads() {
   if (state.selected.size === 0) return;
+  if (state.selected.size >= AUTO_DETACH_THRESHOLD) {
+    const detached = await openInWindow(true);
+    if (detached) return;
+    // Fall through to normal export if window creation failed
+  }
   await startExport();
 }
 
@@ -415,7 +494,7 @@ async function maybeShowTabExportNotice(site) {
   notice.removeAttribute('hidden');
 }
 
-async function startExport() {
+async function startExport(overrideTabId = null) {
   try {
     const selectedThreads = Array.from(state.selected)
       .map(id => state.threads.find(t => t.id === id))
@@ -439,7 +518,9 @@ async function startExport() {
     if (cancelBtnEl) { cancelBtnEl.disabled = false; cancelBtnEl.textContent = 'Cancel Export'; }
     showScreen('exporting');
 
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [tab] = overrideTabId
+      ? [{ id: overrideTabId }]
+      : await chrome.tabs.query({ active: true, currentWindow: true });
 
     const exportData = {
       action: 'START_EXPORT',
@@ -466,6 +547,16 @@ async function startExport() {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
+  // Pop out button
+  const popOutBtn = document.getElementById('pop-out-btn');
+  if (popOutBtn) {
+    if (location.search.includes('detached=1')) {
+      popOutBtn.hidden = true;
+    } else {
+      popOutBtn.addEventListener('click', () => openInWindow(false));
+    }
+  }
+
   // Delegated checkbox handler — one listener survives re-renders of the thread list
   const threadListEl = document.getElementById('thread-list');
   if (threadListEl) {
