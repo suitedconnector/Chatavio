@@ -28,6 +28,11 @@
 //   errorMessage: string | null,   // set on error
 // }
 
+// Cached once at startup — resolves to true when loaded as an unpacked extension.
+const _devModePromise = chrome.management.getSelf()
+  .then(info => info.installType === 'development')
+  .catch(() => false);
+
 let exportJob = null;
 
 // Tracks every background tab opened during an export so onSuspend can close
@@ -556,23 +561,27 @@ async function runExport({ threads, format, site, tabId, yamlFrontmatter }) {
   await persistJob();
 
   // ── Daily export cap (free tier: 20 threads/day) ─────────────────────────
+  const isDev = await _devModePromise;
   const FREE_DAILY_LIMIT = 20;
-  const dailyRecord = await getDailyExportCount(site);
-  const remaining = FREE_DAILY_LIMIT - dailyRecord.count;
 
-  if (remaining <= 0) {
-    exportJob.status = 'error';
-    exportJob.errorMessage = 'daily_limit_reached';
-    await persistJob();
-    broadcast({ action: 'EXPORT_ERROR', error: 'daily_limit_reached' });
-    return;
-  }
+  if (!isDev) {
+    const dailyRecord = await getDailyExportCount(site);
+    const remaining = FREE_DAILY_LIMIT - dailyRecord.count;
 
-  const originalCount = threads.length;
-  if (threads.length > remaining) {
-    threads = threads.slice(0, remaining);
-    exportJob.total = threads.length;
-    broadcast({ action: 'EXPORT_TRIMMED', requested: originalCount, allowed: threads.length });
+    if (remaining <= 0) {
+      exportJob.status = 'error';
+      exportJob.errorMessage = 'daily_limit_reached';
+      await persistJob();
+      broadcast({ action: 'EXPORT_ERROR', error: 'daily_limit_reached' });
+      return;
+    }
+
+    const originalCount = threads.length;
+    if (threads.length > remaining) {
+      threads = threads.slice(0, remaining);
+      exportJob.total = threads.length;
+      broadcast({ action: 'EXPORT_TRIMMED', requested: originalCount, allowed: threads.length });
+    }
   }
 
   // ── Phase 1: scrape every thread — collect { filename, content } for the ZIP

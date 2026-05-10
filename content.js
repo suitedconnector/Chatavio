@@ -855,6 +855,29 @@ if (!window.__chatExporterLoaded) {
         }
       }
 
+      // Remove cards that live inside a "Featured Notebooks" section.
+      // Walk up from each heading that contains "featured" to find the ancestor
+      // that contains notebook links, then exclude every card inside it.
+      const featuredContainers = Array.from(
+        document.querySelectorAll('h1, h2, h3, h4, [class*="section-title"], [class*="sectionTitle"], [class*="section-header"]')
+      )
+        .filter(el => /featured/i.test(el.innerText || el.textContent || ''))
+        .map(el => {
+          let node = el.parentElement;
+          while (node && node !== document.body) {
+            if (node.querySelector('a[href*="/notebook/"]')) return node;
+            node = node.parentElement;
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (featuredContainers.length) {
+        const before = cards.length;
+        cards = cards.filter(card => !featuredContainers.some(c => c.contains(card)));
+        console.log('[ChatExporter] NotebookLM removed featured notebooks:', before - cards.length, '→', cards.length, 'remaining');
+      }
+
       if (cards[0]) {
         // Log full outerHTML of first 3 cards so we can see the real structure
         cards.slice(0, 3).forEach((card, i) => {

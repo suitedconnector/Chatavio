@@ -1,6 +1,13 @@
 // Chatavio — popup.js
 'use strict';
 
+// Cached once — true when the extension is loaded unpacked (development install).
+const _devModePromise = chrome.management.getSelf()
+  .then(info => info.installType === 'development')
+  .catch(() => false);
+let isDev = false;
+_devModePromise.then(v => { isDev = v; });
+
 // State
 const state = {
   site: null,
@@ -327,7 +334,7 @@ function updateSelectionUI() {
   // Select All is capped by total thread count, never by the current search filter
   const selectAllBtn = document.getElementById('select-all-btn');
   const selectAllHint = document.getElementById('select-all-hint');
-  const overLimit = state.threads.length > FREE_THREAD_LIMIT;
+  const overLimit = !isDev && state.threads.length > FREE_THREAD_LIMIT;
   if (selectAllBtn) selectAllBtn.disabled = overLimit;
   if (selectAllHint) selectAllHint.hidden = !overLimit;
 }
@@ -340,6 +347,17 @@ async function exportSelectedThreads() {
 }
 
 async function updateExportQuota(site) {
+  const quotaEl = document.getElementById('export-quota');
+  if (!quotaEl) return;
+
+  const devMode = await _devModePromise;
+  quotaEl.classList.remove('quota-low', 'quota-exhausted');
+
+  if (devMode) {
+    quotaEl.textContent = 'Dev mode — unlimited';
+    return;
+  }
+
   const key = `dailyExports_${site}`;
   const today = new Date().toISOString().slice(0, 10);
   const data = await chrome.storage.local.get(key);
@@ -347,10 +365,6 @@ async function updateExportQuota(site) {
   const used = (record?.date === today) ? record.count : 0;
   const remaining = Math.max(0, 20 - used);
 
-  const quotaEl = document.getElementById('export-quota');
-  if (!quotaEl) return;
-
-  quotaEl.classList.remove('quota-low', 'quota-exhausted');
   if (remaining === 20) {
     quotaEl.textContent = 'Select up to 20 chats to export today.';
   } else if (remaining === 0) {
@@ -452,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const threadId = e.target.dataset.threadId;
 
       if (e.target.checked) {
-        if (state.selected.size >= FREE_LIMIT) {
+        if (!isDev && state.selected.size >= FREE_LIMIT) {
           e.target.checked = false;
           showSelectionLimitWarning();
           return;

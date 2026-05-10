@@ -28,7 +28,8 @@
     "downloads",
     "tabs",
     "storage",
-    "offscreen"
+    "offscreen",
+    "management"
   ],
   "host_permissions": [
     "https://claude.ai/*",
