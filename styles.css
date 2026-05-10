@@ -522,9 +522,15 @@ body {
   to   { transform: rotate(360deg); }
 }
 
-#r-ticks, #r-comet {
+#r-ticks {
   transform-origin: 80px 80px;
   animation: tick-sweep 60s linear infinite;
+  animation-play-state: paused;
+}
+
+#r-comet {
+  transform-origin: 80px 80px;
+  animation: tick-sweep 2s linear infinite;
   animation-play-state: paused;
 }
 
