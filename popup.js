@@ -3,12 +3,8 @@
 
 const AUTO_DETACH_THRESHOLD = 10;
 
-// Cached once — true when the extension is loaded unpacked (development install).
-const _devModePromise = chrome.management.getSelf()
-  .then(info => info.installType === 'development')
-  .catch(() => false);
+const _devModePromise = Promise.resolve(false);
 let isDev = false;
-_devModePromise.then(v => { isDev = v; });
 
 // State
 const state = {

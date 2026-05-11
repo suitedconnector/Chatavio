@@ -28,10 +28,7 @@
 //   errorMessage: string | null,   // set on error
 // }
 
-// Cached once at startup — resolves to true when loaded as an unpacked extension.
-const _devModePromise = chrome.management.getSelf()
-  .then(info => info.installType === 'development')
-  .catch(() => false);
+const _devModePromise = Promise.resolve(false);
 
 let exportJob = null;
 
