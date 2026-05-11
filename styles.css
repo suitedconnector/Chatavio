@@ -142,14 +142,13 @@ body {
 }
 
 .logo-img {
-  height: 26px;
-  max-height: 26px;
+  height: 125px;
   width: auto;
   display: block;
 }
 
 .logo-small {
-  height: 175px;
+  height: 18px;
   width: auto;
   display: block;
   margin: 0 auto 8px;
