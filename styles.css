@@ -142,8 +142,8 @@ body {
 }
 
 .logo-img {
-  height: 125px;
-  width: auto;
+  height: auto;
+  width: 125px;
   display: block;
 }
 
